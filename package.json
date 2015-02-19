@@ -1,0 +1,31 @@
+{
+  "name": "chestees-cms",
+  "version": "0.0.0",
+  "description": "chestees cms",
+  "main": "app.js",
+  "dependencies": {
+    "mssql": "~1.3.0",
+    "express": "~4.11.2",
+    "mongoose": "~3.8.23",
+    "node-restful": "~0.1.18",
+    "serve-static": "~1.8.1",
+    "handlebars": "~3.0.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-less": "~1.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chestees/chestees-cms.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chestees/chestees-cms/issues"
+  },
+  "homepage": "https://github.com/chestees/chestees-cms"
+}
