@@ -40,16 +40,30 @@ main {
 	padding: 10px 30px;
 }
 aside {
+	z-index: 5;
 	.side-navigation {
-		top: 50px;
-		li {
-			a {
-				padding: 5px 10px;
+		top: 60px;
+		
+		&.btn-group-vertical {
+			> .btn-group {
+				.dropdown-menu {
+					z-index: 100;
+				}
+				&:hover .dropdown-menu {
+					display: block;
+					margin: -1px 0 0 10px;
+ 				}
+				> .btn {
+					.caret {
+						margin: -1px 0 0 10px;
+					}
+				}
 			}
 		}
 	}
 }
 article {
+	z-index: 1;
 	top: 50px;
 	.thumbnail_md {
 		height: 100px;
