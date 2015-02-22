@@ -28,6 +28,10 @@ define( function( require ) {
 		}
 		, initialize: function( options ) {
 			this.year = options.year;
+			if( this.year === 'all' ) {
+				this.year = 2015;
+				this.showAll = true;
+			}
 			this.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 		}
 		, onRender: function( options ) {
@@ -40,42 +44,79 @@ define( function( require ) {
 				, success: _.bind( function ( data ) {
 					numRecords = data.length;
 					var year = moment().year();
-					var yearDiff = year - this.year;
+					var yearDiff;
 					var yearStart;
 					var yearEnd;
 					var orders;
-					this.dataYears = [];
-					this.xAxisYears = [];
 					var monthTotal;
+					var yearData;;
+					this.series = [];
 
-					yearStart = moment( this.year, 'YYYY' ).startOf( 'year' );
-					yearEnd = moment( this.year, 'YYYY' ).endOf( 'year' );
-					// Filter orders for the selected year
-					orders = _.filter( data, _.bind( function( item ) {
-						if( moment( item.DateOrdered ).isBetween( yearStart, yearEnd ) ) {
-							return( item );
-						}
-					}, this ) );
+					if( this.showAll ) {
+						this.chartTitle = 'Montly Sales: Total Amounts';
+						while ( year > 2007 ) {
+							yearData = []
+							yearDiff = this.year - year;
+							yearStart = moment( year, 'YYYY' ).startOf( 'year' );
+							yearEnd = moment( year, 'YYYY' ).endOf( 'year' );
+							// Filter orders for the selected year
+							orders = _.filter( data, _.bind( function( item ) {
+								if( moment( item.DateOrdered ).isBetween( yearStart, yearEnd ) ) {
+									return( item );
+								}
+							}, this ) );
 
-					_.each( this.months, _.bind( function( month ) {
-						monthTotal = 0;
-						var monthStart = moment( month, 'MMM' ).startOf( 'month' ).subtract( yearDiff, 'years');
-						var monthEnd   = moment( month, 'MMM' ).endOf( 'month' ).subtract( yearDiff, 'years');
-						// Filter orders for the month in the loop
-						var filtered = _.filter( orders, function( order ) {
-							if( moment( order.DateOrdered ).isBetween( monthStart, monthEnd ) ) {
-								return( order );
+							_.each( this.months, _.bind( function( month ) {
+								monthTotal = 0;
+								var monthStart = moment( month, 'MMM' ).startOf( 'month' ).subtract( yearDiff, 'years');
+								var monthEnd   = moment( month, 'MMM' ).endOf( 'month' ).subtract( yearDiff, 'years');
+								// Filter orders for the month in the loop
+								var filtered = _.filter( orders, function( order ) {
+									if( moment( order.DateOrdered ).isBetween( monthStart, monthEnd ) ) {
+										return( order );
+									}
+								} );
+								_.each( filtered, function( order ) {
+									monthTotal = monthTotal + order.TotalAmount;	
+								});
+								
+								yearData.push( monthTotal );
+
+							}, this ) );
+
+							this.series.push( { 'data': yearData, 'name': year } );
+							year = year - 1;
+						};
+					} else {
+						this.chartTitle = this.year + ' Montly Sales: Total Amounts';
+						yearData = [];
+						yearDiff = year - this.year;
+						yearStart = moment( this.year, 'YYYY' ).startOf( 'year' );
+						yearEnd = moment( this.year, 'YYYY' ).endOf( 'year' );
+						// Filter orders for the selected year
+						orders = _.filter( data, _.bind( function( item ) {
+							if( moment( item.DateOrdered ).isBetween( yearStart, yearEnd ) ) {
+								return( item );
 							}
-						} );
-						_.each( filtered, function( order ) {
-							monthTotal = monthTotal + order.TotalAmount;	
-						});
-						this.dataYears.push( monthTotal );
-					}, this ) );
-					
-					this.xAxisYears.push( year );
+						}, this ) );
 
-					year = year - 1;
+						_.each( this.months, _.bind( function( month ) {
+							monthTotal = 0;
+							var monthStart = moment( month, 'MMM' ).startOf( 'month' ).subtract( yearDiff, 'years');
+							var monthEnd   = moment( month, 'MMM' ).endOf( 'month' ).subtract( yearDiff, 'years');
+							// Filter orders for the month in the loop
+							var filtered = _.filter( orders, function( order ) {
+								if( moment( order.DateOrdered ).isBetween( monthStart, monthEnd ) ) {
+									return( order );
+								}
+							} );
+							_.each( filtered, function( order ) {
+								monthTotal = monthTotal + order.TotalAmount;	
+							});
+							yearData.push( monthTotal );
+						}, this ) );
+						this.series.push( { 'data': yearData, 'name': this.year } );
+					}
 
 				}, this )
 				, error: _.bind( function( res ) {
@@ -101,10 +142,10 @@ define( function( require ) {
 					plotBorderColor: '#a2a2a2'
 				},
 				title: {
-					text: this.year + ' Montly Sales: Total Amounts'
+					text: this.chartTitle
 				},
 				legend: {
-					enabled: false
+					enabled: true
 				},
 				xAxis: {
 					categories: this.months
@@ -119,14 +160,35 @@ define( function( require ) {
 				}],
 				tooltip: {
 					formatter: function () {
-						return this.x + ': $' + this.y.toFixed( 2 );
+						return this.x + ', ' + this.series.name + ': $' + this.y.toFixed( 2 );
 					}
 				},
 				plotOptions: {
+					series: {
+						shadow: false,
+						lineWidth: 1,
+						states: {
+							hover: {
+								enabled: true,
+								lineWidth: 2
+							}
+						},
+						marker: {
+							enabled: true,
+							symbol: 'circle',
+							radius: 2,
+							fillColor: '#000000',
+							lineColor: '#000000',
+							states: {
+								hover: {
+									fillColor: '#ff0000',
+									radius: 3
+								}
+							}
+						}
+					}
 				},
-				series: [{
-					data: this.dataYears
-				}]
+				series: this.series
 			});
 		}
 	});

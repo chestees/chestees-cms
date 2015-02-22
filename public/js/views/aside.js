@@ -44,7 +44,6 @@ define( function( require ) {
 			var year = moment().year();
 
 			while( year > 2007 ) {
-				this.ui.annualSalesYears.append( '<li><a href="#/reporting/annual/'+ year +'">'+ year +'</a></li>' );
 				this.ui.monthlySalesYears.append( '<li><a href="#/reporting/monthly/'+ year +'">'+ year +'</a></li>' );
 				year = moment( year, 'YYYY' ).subtract( 1, 'year').year();
 			}
