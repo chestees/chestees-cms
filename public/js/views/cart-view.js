@@ -22,7 +22,9 @@ define( function( require ) {
 			};
 		}
 		, onRender: function( options ) {
-			console.log( );
+			if( this.model.get( 'Purchased' ) ) {
+				this.$el.addClass( 'bg-success' );
+			}
 		}
 	});
 

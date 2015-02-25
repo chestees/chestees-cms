@@ -6,13 +6,7 @@ define( function( require ) {
 	var HighCharts = require( 'highcharts' );
 
 	var tmplChart = require( 'text!/templates/chart.html' );
-
-	Highcharts.setOptions({
-		lang: {
-			numericSymbols: null
-		}
-	});
-
+	
 	var AnnualView = Marionette.ItemView.extend({
 		template: Handlebars.compile( tmplChart )
 		, ui: {
@@ -28,6 +22,12 @@ define( function( require ) {
 		}
 		, initialize: function() {}
 		, onRender: function( options ) {
+			Highcharts.setOptions({
+				lang: {
+					numericSymbols: null
+				}
+			});
+
 			$.ajax({
 				type: 'get'
 				, url: '/api/orders/'
@@ -71,9 +71,7 @@ define( function( require ) {
 				}, this )
 			}).done( _.bind( function( data ) {
 				this.buildChart();
-			}, this ) );
-
-			
+			}, this ) );			
 		}
 		, buildChart: function() {
 			this.ui.chart.highcharts({

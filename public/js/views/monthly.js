@@ -7,12 +7,6 @@ define( function( require ) {
 
 	var tmplChart = require( 'text!/templates/chart.html' );
 
-	Highcharts.setOptions({
-		lang: {
-			numericSymbols: null
-		}
-	});
-
 	var MonthlyView = Marionette.ItemView.extend({
 		template: Handlebars.compile( tmplChart )
 		, ui: {
@@ -35,6 +29,12 @@ define( function( require ) {
 			this.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 		}
 		, onRender: function( options ) {
+			Highcharts.setOptions({
+				lang: {
+					numericSymbols: null
+				}
+			});
+
 			$.ajax({
 				type: 'get'
 				, url: '/api/orders/'

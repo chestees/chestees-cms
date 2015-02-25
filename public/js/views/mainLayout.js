@@ -9,7 +9,7 @@ define( function( require ) {
 
 	mainLayoutView = Marionette.LayoutView.extend({
 		template: _.template( tmplMainLayout )
-		, className: 'layout'
+		, className: 'layout container-fluid'
 		, regions: {
 			header:    'header'
 			, aside:   'aside'

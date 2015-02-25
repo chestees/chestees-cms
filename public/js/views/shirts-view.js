@@ -47,7 +47,11 @@ define( function( require ) {
 			}).done( _.bind( function( data ) {
 				if( numRecords > 0 ) {
 					_.each( data, _.bind( function( item, key ) {
-						this.buildShirtList( item, key );
+						if( !this.isDestroyed ) {
+							this.buildShirtList( item, key );
+						} else {
+							return false;
+						}
 					}, this ) );
 				} else {
 					this.ui.summaryListing.append( '<li>Not one single sale.</li>' );

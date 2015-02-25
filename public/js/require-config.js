@@ -30,6 +30,9 @@ requirejs.config({
 		'handlebars': {
 			exports: 'Handlebars'
 		},
+		'highcharts': {
+			'exports': 'Highcharts'
+		}
 	}
 });
 

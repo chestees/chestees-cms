@@ -8,6 +8,7 @@ define( function( require ) {
 
 	var Router         = require( 'js/routing/router' );
 	var CartCollection = require( 'js/collections/cart-collection' );
+	var OrdersCollection = require( 'js/collections/orders' );
 	var MainLayout     = require( 'js/views/mainLayout' );
 	
 	app.addRegions({
@@ -16,6 +17,7 @@ define( function( require ) {
 
 	app.addInitializer(function() {
 		app.cartCollection = new CartCollection();
+		app.ordersCollection = new OrdersCollection();
 
 		app.cartCollection.fetch().done( function() {
 			app.mainLayout = new MainLayout( app );

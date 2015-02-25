@@ -4,6 +4,7 @@ define( function( require ) {
 	var Marionette  = require( 'marionette' );
 
 	var CartView       = require( 'js/views/cart-collection' );
+	var Orders         = require( 'js/views/orders-collection' );
 	var ProductSummary = require( 'js/views/shirts-collection' );
 	var Annual         = require( 'js/views/annual' );
 	var Monthly        = require( 'js/views/monthly' );
@@ -15,6 +16,7 @@ define( function( require ) {
 		, routes: {
 			'': 'home',
 			'cart': 'cart',
+			'orders': 'orders',
 			'reporting/product': 'productSummary',
 			'reporting/annual': 'annual',
 			'reporting/monthly/:year': 'monthly'
@@ -31,6 +33,11 @@ define( function( require ) {
 		}
 		, monthly: function( year ) {
 			this.app.mainLayout.article.show( new Monthly( { 'app': this.app, 'year': year } ) );	
+		}
+		, orders: function() {
+			this.app.ordersCollection.fetch().done( _.bind( function() {
+				this.app.mainLayout.article.show( new Orders( this.app ) );
+			}, this ) );
 		}
 	});
 	return Router;
