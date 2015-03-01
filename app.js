@@ -1,9 +1,9 @@
 var express     = require('express');
 var sql         = require('mssql');
 var serveStatic = require('serve-static');
-
 var app = express();
 
+app.use(require('skipper')());
 app.use( serveStatic('public') );
 
 app.set('port', (process.env.PORT || 4000));
