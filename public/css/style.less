@@ -28,7 +28,7 @@ h1, h2, h3, h4, h5, h6 {
 	margin: 0 0 10px 0 !important;
 }
 header {
-	z-index: 2;
+	z-index: 1;
 
 	&.masthead {
 		background-color: #cccccc;
@@ -43,7 +43,7 @@ main {
 	padding: 10px 30px;
 
 	aside {
-		z-index: 5;
+		z-index: 1;
 		.side-navigation {
 			top: 60px;
 			
@@ -66,13 +66,13 @@ main {
 		}
 	}
 	article {
+
+		top: 50px;
+		
 		.options-bar {
-			background: #ebebeb;
 			border-bottom: 1px solid #A2A2A2;
 			padding: 10px;
 		}
-		z-index: 1;
-		top: 50px;
 		.thumbnail_md {
 			height: 100px;
 		}
@@ -92,6 +92,20 @@ main {
 		.row-item {
 			border-bottom: 1px solid #A2A2A2;
 			padding: 10px;
+		}
+		.orders {
+			.order-item {
+				.cart-item-detail {
+					
+				}
+			}
+		}
+		.summary {
+			.summary-item {
+				.summary-numbers {
+					margin-bottom: 10px;
+				}
+			}
 		}
 	}
 }

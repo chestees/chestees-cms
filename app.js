@@ -26,7 +26,8 @@ sql.connect( config, function( err ) {
 	}
 	
 	var shirtListing = new sql.Request();
-	var cartListing  = new sql.Request();
+	// var cartListing  = new sql.Request();
+	var cartItems    = new sql.Request();
 	var salesListing = new sql.Request();
 	var orders       = new sql.Request();
 	var orderItems   = new sql.Request();
@@ -47,26 +48,103 @@ sql.connect( config, function( err ) {
 	});
 
 	// Cart listing
+	// app.use('/api/cart', function( req, res ) {
+	// 	cartListing.query( 'SELECT TOP 25 C.CustomerID, C.VisitorID, C.Purchased, C.DateAdded, C.CartID, ' +
+	// 		'P.Product, P.Image_Index, C.Price, S.SizeAbbr, Y.Style, C.Quantity ' +
+	// 		'FROM (((tblCart C INNER JOIN tblProduct P ON C.ProductID = P.ProductID) ' +
+	// 			'INNER JOIN tblProductSize S ON C.ProductSizeID = S.ProductSizeID) ' +
+	// 			'INNER JOIN tblProductStyle Y ON C.ProductStyleID = Y.ProductStyleID) ' +
+	// 		'ORDER BY C.DateAdded DESC'
+	// 		, function( err, recordset ) {
+	// 			app.cartListing = recordset;
+	// 			res.send( app.cartListing );
+	// 			if( err ) {
+	// 				console.log("Error: " + err );
+	// 			}
+	// 		}
+	// 	);
+	// });
+
+	// Cart item
 	app.use('/api/cart', function( req, res ) {
-		cartListing.query( 'SELECT TOP 25 C.CustomerID, C.VisitorID, C.Purchased, C.DateAdded, C.CartID, ' +
-			'P.Product, P.Image_Index, C.Price, S.SizeAbbr, Y.Style, C.Quantity ' +
-			'FROM (((tblCart C INNER JOIN tblProduct P ON C.ProductID = P.ProductID) ' +
-				'INNER JOIN tblProductSize S ON C.ProductSizeID = S.ProductSizeID) ' +
-				'INNER JOIN tblProductStyle Y ON C.ProductStyleID = Y.ProductStyleID) ' +
-			'ORDER BY C.DateAdded DESC'
-			, function( err, recordset ) {
-				app.cartListing = recordset;
-				res.send( app.cartListing );
-				if( err ) {
-					console.log("Error: " + err );
+		var VisitorId = req.query.VisitorId;
+		if( VisitorId ) {
+			cartItems.input( 'VisitorId', VisitorId );
+			// Cart items by visitor
+			cartItems.query( 'SELECT C.CustomerID, C.VisitorID, C.Purchased, C.DateAdded, C.CartID, ' +
+				'P.Product, P.Image_Index, C.Price, S.SizeAbbr, Y.Style, C.Quantity ' +
+				'FROM (((tblCart C INNER JOIN tblProduct P ON C.ProductID = P.ProductID) ' +
+					'INNER JOIN tblProductSize S ON C.ProductSizeID = S.ProductSizeID) ' +
+					'INNER JOIN tblProductStyle Y ON C.ProductStyleID = Y.ProductStyleID) ' +
+				'WHERE C.VisitorID = ' + VisitorId
+				, function( err, recordset ) {
+					app.cartItems = recordset;
+					res.send( app.cartItems );
+					if( err ) {
+						console.log("Error: " + err );
+					}
 				}
-			}
-		);
+			);
+		} else {
+			cartItems.query( 'SELECT TOP 25 C.CustomerID, C.VisitorID, C.Purchased, C.DateAdded, C.CartID, ' +
+				'P.Product, P.Image_Index, C.Price, S.SizeAbbr, Y.Style, C.Quantity ' +
+				'FROM (((tblCart C INNER JOIN tblProduct P ON C.ProductID = P.ProductID) ' +
+					'INNER JOIN tblProductSize S ON C.ProductSizeID = S.ProductSizeID) ' +
+					'INNER JOIN tblProductStyle Y ON C.ProductStyleID = Y.ProductStyleID) ' +
+				'ORDER BY C.DateAdded DESC'
+				, function( err, recordset ) {
+					app.cartItems = recordset;
+					res.send( app.cartItems );
+					if( err ) {
+						console.log("Error: " + err );
+					}
+				}
+			);
+		}
 	});
 
 	// Orders listing
 	app.use('/api/orders', function( req, res ) {
-		orders.query( 'SELECT C.CartID, C.Quantity, C.Price, ' +
+		var OrderId = req.query.OrderId;
+		var ProductId = req.query.ProductId;
+		if( OrderId ) {
+			orders.input( 'OrderId', OrderId );
+			// Order Items listing
+			orders.query( 'SELECT O.OrderID, P.Product, P.ProductID, P.Image_Index, C.Quantity, C.Price, ' +
+				'S.SizeAbbr, Y.Style ' +
+				'FROM ((((tblOrder O INNER JOIN relCartToOrder R ON O.OrderID = R.OrderID ' +
+				'INNER JOIN tblCart C ON R.CartID = C.CartID ) ' +
+				'INNER JOIN tblProduct P ON P.ProductID = C.ProductID ) ' +
+				'INNER JOIN tblProductSize S ON C.ProductSizeID = S.ProductSizeID) ' +
+				'INNER JOIN tblProductStyle Y ON C.ProductStyleID = Y.ProductStyleID) ' +
+				'WHERE O.OrderID = ' + OrderId
+				, function( err, recordset ) {
+					app.orders = recordset;
+					res.send( app.orders );
+					if( err ) {
+						console.log("Error: " + err );
+					}
+				}
+			);
+		} else if( ProductId ) {
+			orders.input( 'ProductId', ProductId );
+			// Orders by product
+			orders.query( 'SELECT C.CartID, C.ProductID, C.Quantity, P.Product, P.Image_Index, C.Price, ' +
+				'O.OrderID, O.DateOrdered ' +
+				'FROM tblOrder O INNER JOIN relCartToOrder R ON O.OrderID = R.OrderID ' +
+				'INNER JOIN tblCart C ON R.CartID = C.CartID ' +
+				'INNER JOIN tblProduct P ON P.ProductID = C.ProductID ' +
+				'WHERE P.ProductID = ' + ProductId,
+				function( err, recordset ) {
+					app.orders = recordset;
+					res.send( app.orders );
+					if( err ) {
+						console.log("Error: " + err );
+					}
+				}
+			);
+		} else {
+			orders.query( 'SELECT C.CartID, ' +
 				'O.OrderID, O.DateOrdered, O.PurchaseAmount, O.ShippingCost, O.DiscountAmount, O.TotalAmount, ' +
 				'B.FName as BillingFName, B.LName as BillingLName, B.Address as BillingAddress, B.Address2 as BillingAddress2, ' +
 				'B.City as BillingCity, B.State as BillingState, B.Zip as BillingZip, B.Email, ' +
@@ -76,61 +154,38 @@ sql.connect( config, function( err ) {
 				'INNER JOIN tblCart C ON R.CartID = C.CartID ) ' +
 				'INNER JOIN tblBillingAddress B ON B.BillingID = O.BillingID ) ' +
 				'INNER JOIN tblShippingAddress S ON S.ShippingID = O.ShippingID )' 
-			, function( err, recordset ) {
-				app.orders = recordset;
-				res.send( app.orders );
-				if( err ) {
-					console.log("Error: " + err );
+				, function( err, recordset ) {
+					app.orders = recordset;
+					res.send( app.orders );
+					if( err ) {
+						console.log("Error: " + err );
+					}
 				}
-			}
-		);
-	});
-
-	// Items ordered from an Order ID
-	app.use('/api/order/:OrderId', function( req, res ) {
-		var OrderId = req.params.OrderId;
-		orderItems.input( 'OrderId', OrderId );
-
-		// Order Items listing
-		orderItems.query( 'SELECT O.OrderID, P.Product, P.ProductID, P.Image_Index, C.Quantity, C.Price, ' +
-				'S.SizeAbbr, Y.Style ' +
-				'FROM ((((tblOrder O INNER JOIN relCartToOrder R ON O.OrderID = R.OrderID ' +
-				'INNER JOIN tblCart C ON R.CartID = C.CartID ) ' +
-				'INNER JOIN tblProduct P ON P.ProductID = C.ProductID ) ' +
-				'INNER JOIN tblProductSize S ON C.ProductSizeID = S.ProductSizeID) ' +
-				'INNER JOIN tblProductStyle Y ON C.ProductStyleID = Y.ProductStyleID) ' +
-				'WHERE O.OrderID = @OrderId'
-			, function( err, recordset ) {
-				app.orderItems = recordset;
-				res.send( app.orderItems );
-				if( err ) {
-					console.log("Error: " + err );
-				}
-			}
-		);
+			);
+		}
 	});
 
 	// Product sales list. List all orders of each product.
-	app.use('/api/orders/:ProdId', function( req, res ) {
-		var ProductId = req.params.ProdId;
+	// app.use('/api/orders/:ProdId', function( req, res ) {
+	// 	var ProductId = req.params.ProdId;
 
-		salesListing.input( 'ProdId', ProductId );
+	// 	salesListing.input( 'ProdId', ProductId );
 		
-		salesListing.query( 'SELECT C.CartID, C.ProductID, C.Quantity, P.Product, P.Image_Index, C.Price, ' +
-			'O.OrderID, O.DateOrdered ' +
-			'FROM tblOrder O INNER JOIN relCartToOrder R ON O.OrderID = R.OrderID ' +
-			'INNER JOIN tblCart C ON R.CartID = C.CartID ' +
-			'INNER JOIN tblProduct P ON P.ProductID = C.ProductID ' +
-			'WHERE P.ProductID = @ProdId',
-			function( err, recordset ) {
-				app.salesListing = recordset;
-				res.send( app.salesListing );
-				if( err ) {
-					console.log("Error: " + err );
-				}
-			}
-		);
-	});
+	// 	salesListing.query( 'SELECT C.CartID, C.ProductID, C.Quantity, P.Product, P.Image_Index, C.Price, ' +
+	// 		'O.OrderID, O.DateOrdered ' +
+	// 		'FROM tblOrder O INNER JOIN relCartToOrder R ON O.OrderID = R.OrderID ' +
+	// 		'INNER JOIN tblCart C ON R.CartID = C.CartID ' +
+	// 		'INNER JOIN tblProduct P ON P.ProductID = C.ProductID ' +
+	// 		'WHERE P.ProductID = @ProdId',
+	// 		function( err, recordset ) {
+	// 			app.salesListing = recordset;
+	// 			res.send( app.salesListing );
+	// 			if( err ) {
+	// 				console.log("Error: " + err );
+	// 			}
+	// 		}
+	// 	);
+	// });
 });
 
 // app.use('/*', function  (req, res) {

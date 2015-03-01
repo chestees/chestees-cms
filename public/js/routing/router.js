@@ -8,6 +8,7 @@ define( function( require ) {
 	var ProductSummary = require( 'js/views/shirts-collection' );
 	var Annual         = require( 'js/views/annual' );
 	var Monthly        = require( 'js/views/monthly' );
+	var Query          = require( 'js/views/query' );
 
 	var Router = Marionette.AppRouter.extend({
 		initialize: function( options ) {
@@ -19,7 +20,8 @@ define( function( require ) {
 			'orders': 'orders',
 			'reporting/product': 'productSummary',
 			'reporting/annual': 'annual',
-			'reporting/monthly/:year': 'monthly'
+			'reporting/monthly/:year': 'monthly',
+			'reporting/query': 'query'
 		}
 		, home: function() {}
 		, cart: function() {
@@ -37,6 +39,11 @@ define( function( require ) {
 		, orders: function() {
 			this.app.ordersCollection.fetch().done( _.bind( function() {
 				this.app.mainLayout.article.show( new Orders( this.app ) );
+			}, this ) );
+		}
+		, query: function() {
+			this.app.ordersCollection.fetch().done( _.bind( function() {
+				this.app.mainLayout.article.show( new Query( this.app ) );
 			}, this ) );
 		}
 	});

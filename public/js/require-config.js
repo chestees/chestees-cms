@@ -5,6 +5,7 @@ requirejs.config({
 		underscore: 'bower_components/underscore/underscore',
 		text: 		'bower_components/requirejs-text/text',
 		jquery: 	'bower_components/jquery/dist/jquery',
+		jqueryui:   'bower_components/jqueryui/jquery-ui',
 		handlebars: 'bower_components/handlebars/handlebars',
 		marionette: 'bower_components/marionette/lib/backbone.marionette',
 		bootstrap:  'bower_components/bootstrap/dist/js/bootstrap',
@@ -24,7 +25,7 @@ requirejs.config({
 			exports : 'Marionette'
 		},
 		'bootstrap': {
-			deps: [ 'jquery' ],
+			deps: [ 'jquery', 'jqueryui' ],
 			exports: 'Bootstrap'
 		},
 		'handlebars': {
