@@ -10,11 +10,13 @@ define( function( require ) {
 	
 	var CartCollectionView = Marionette.CompositeView.extend({
 		childView: CartView
+		, childViewContainer: '.cart-container'
 		, template: Handlebars.compile( tmplCartCollection )
 		, ui: {
 			'chartModal': '.modal',
 			'btnChart': '.show-chart',
-			'chart': '.chart'
+			'chart': '.chart',
+			'cartContainer': '.cart-container'
 		}
 		, events: {
 			'click @ui.btnChart': 'showChart'
