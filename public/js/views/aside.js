@@ -22,7 +22,7 @@ define( function( require ) {
 			
 		}
 		, className: 'row'
-		, onRender: function() {
+		, onShow: function() {
 			var width;
 			this.buildYearsNav();
 			

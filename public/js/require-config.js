@@ -10,7 +10,11 @@ requirejs.config({
 		marionette: 'bower_components/marionette/lib/backbone.marionette',
 		bootstrap:  'bower_components/bootstrap/dist/js/bootstrap',
 		moment:     'bower_components/moment/moment',
-		highcharts: 'bower_components/highcharts-release/highcharts.src'
+		highcharts: 'bower_components/highcharts-release/highcharts.src',
+		URI:        'bower_components/uri.js/src/URI',
+		punycode:   'bower_components/uri.js/src/punycode',
+		IPv6:       'bower_components/uri.js/src/IPv6',
+		SecondLevelDomains: 'bower_components/uri.js/src/SecondLevelDomains'
 	}, 
 	shim: {
 		'underscore': {

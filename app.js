@@ -1,24 +1,38 @@
 var express     = require('express');
 var sql         = require('mssql');
 var serveStatic = require('serve-static');
-var app = express();
+var _           = require('underscore');
+var auth = require('basic-auth')
+var app         = express();
 
-app.use(require('skipper')());
+// Authentication 
+app.use( function( req, res, next ) {
+	var user = auth( req );
+	if ( !user || user.name !== 'chestees' || user.pass !== process.env.BASIC_AUTH_PW ) {
+		res.writeHead( 401, { 'WWW-Authenticate': 'Basic realm="Chestees Admin"' } );
+		res.end();
+	} else {
+		next();
+	}
+} );
+
+app.use( require('skipper')() );
 app.use( serveStatic('public') );
 
-app.set('port', (process.env.PORT || 4000));
+app.set('port', (process.env.PORT || 5000));
 
 app.listen(app.get('port'), function() {
   console.log("Node app is running at localhost:" + app.get('port'));
 });
 
-var config = {
+config = {
 	user: process.env.DB_USER,
 	password: process.env.DB_PASSWORD,
 	server: process.env.DB_SERVER,
 	database: process.env.DB_NAME,
-	port: process.env.DB_PORT
 }
+
+require( './routes/order-detail' )( app );
 
 sql.connect( config, function( err ) {
 	if( err ) {
@@ -26,7 +40,6 @@ sql.connect( config, function( err ) {
 	}
 	
 	var shirtListing = new sql.Request();
-	// var cartListing  = new sql.Request();
 	var cartItems    = new sql.Request();
 	var salesListing = new sql.Request();
 	var orders       = new sql.Request();
@@ -46,24 +59,6 @@ sql.connect( config, function( err ) {
 			}
 		);
 	});
-
-	// Cart listing
-	// app.use('/api/cart', function( req, res ) {
-	// 	cartListing.query( 'SELECT TOP 25 C.CustomerID, C.VisitorID, C.Purchased, C.DateAdded, C.CartID, ' +
-	// 		'P.Product, P.Image_Index, C.Price, S.SizeAbbr, Y.Style, C.Quantity ' +
-	// 		'FROM (((tblCart C INNER JOIN tblProduct P ON C.ProductID = P.ProductID) ' +
-	// 			'INNER JOIN tblProductSize S ON C.ProductSizeID = S.ProductSizeID) ' +
-	// 			'INNER JOIN tblProductStyle Y ON C.ProductStyleID = Y.ProductStyleID) ' +
-	// 		'ORDER BY C.DateAdded DESC'
-	// 		, function( err, recordset ) {
-	// 			app.cartListing = recordset;
-	// 			res.send( app.cartListing );
-	// 			if( err ) {
-	// 				console.log("Error: " + err );
-	// 			}
-	// 		}
-	// 	);
-	// });
 
 	// Cart item
 	app.use('/api/cart', function( req, res ) {
@@ -107,6 +102,7 @@ sql.connect( config, function( err ) {
 	app.use('/api/orders', function( req, res ) {
 		var OrderId = req.query.OrderId;
 		var ProductId = req.query.ProductId;
+
 		if( OrderId ) {
 			orders.input( 'OrderId', OrderId );
 			// Order Items listing
@@ -144,25 +140,38 @@ sql.connect( config, function( err ) {
 				}
 			);
 		} else {
-			orders.query( 'SELECT C.CartID, ' +
-				'O.OrderID, O.DateOrdered, O.PurchaseAmount, O.ShippingCost, O.DiscountAmount, O.TotalAmount, ' +
-				'B.FName as BillingFName, B.LName as BillingLName, B.Address as BillingAddress, B.Address2 as BillingAddress2, ' +
-				'B.City as BillingCity, B.State as BillingState, B.Zip as BillingZip, B.Email, ' +
-				'S.FName as ShippingFName, S.LName as ShippingLName, S.Address as ShippingAddress, S.Address2 as ShippingAddress2, ' +
-				'S.City as ShippingCity, S.State as ShippingState, S.Zip as ShippingZip ' +
-				'FROM (((tblOrder O INNER JOIN relCartToOrder R ON O.OrderID = R.OrderID ' +
-				'INNER JOIN tblCart C ON R.CartID = C.CartID ) ' +
-				'INNER JOIN tblBillingAddress B ON B.BillingID = O.BillingID ) ' +
-				'INNER JOIN tblShippingAddress S ON S.ShippingID = O.ShippingID )' 
-				, function( err, recordset ) {
-					app.orders = recordset;
-					res.send( app.orders );
-					if( err ) {
-						console.log("Error: " + err );
-					}
+			var order    = new sql.Request();
+			var page     = req.query.Page || 1;
+			var pageSize = req.query.PageSize || 50;
+			var orderBy  = req.query.OrderBy || 'DateAdded';
+
+			order.input( 'Search', sql.NVarChar, 0 );
+			order.input( 'Page', sql.Int, page );
+			order.input( 'PageSize', sql.Int, pageSize );
+			order.input( 'OrderBy', sql.NVarChar, orderBy );
+
+			order.execute( 'usp_Chestees_Orders', _.bind( function( err, recordset, returnValue ) {
+				
+				// console.log( '1: ' + JSON.stringify( recordset[0] ) + '\n');
+				console.log( '2: ' + JSON.stringify( recordset[1][0] ) + '\n' );
+
+				var orders      = recordset[0];
+				app.ordersCount = recordset[1][0];
+
+				// console.log('Length: ' + recordset.length); // count of recordsets returned by the procedure 
+				// console.log('Length [0]: ' + recordset[0].length); // count of rows contained in first recordset 
+
+				if( err ) {
+					console.log("Error: " + err );
+				} else {
+					res.send( orders );
 				}
-			);
+			}, this ) );
 		}
+	});
+
+	app.use( '/api/count/orders', function( req, res ) {
+		res.send( app.ordersCount );
 	});
 
 	// Product sales list. List all orders of each product.
@@ -187,7 +196,3 @@ sql.connect( config, function( err ) {
 	// 	);
 	// });
 });
-
-// app.use('/*', function  (req, res) {
-//   res.redirect('404.html');
-// } );

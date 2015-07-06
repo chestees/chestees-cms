@@ -10,10 +10,13 @@ define( function( require ) {
 	var OrdersView = Marionette.ItemView.extend({
 		template: Handlebars.compile( tmplOrdersListing )
 		, ui: {
-			'thumbnails': '.thumbnails',
-			'cart': '.cart'
+			'thumbnails': '.thumbnails'
+			, 'cart': '.cart'
+			, 'print': '.print'
 		}
-		, events: {}
+		, events: {
+			'click @ui.print': 'print'
+		}
 		, className: 'order-item row row-item'
 		, templateHelpers: function() {
 			var orderDate = moment( this.model.get( 'DateOrdered' ) ).format( 'dddd, MMMM Do YYYY, h:mm:ss a' );
@@ -24,13 +27,14 @@ define( function( require ) {
 				totalAmount: totalAmount
 			};
 		}
-		, initialize: function() {}
+		, initialize: function( options ) {
+			this.app = options.app;
+			this.orderId = this.model.get( 'OrderID' );
+		}
 		, onRender: function( options ) {
-			var orderId = this.model.get( 'OrderID' );
-			var cartId  = this.model.get( 'CartID' );
 			$.ajax({
 				type: 'get'
-				, url: '/api/orders?OrderId=' + orderId
+				, url: '/api/orders?OrderId=' + this.orderId
 				, dataType: 'json'
 				, contentType: 'application/json'
 				, data: {}
@@ -55,6 +59,10 @@ define( function( require ) {
 				, complete: _.bind( function () {
 				}, this )
 			});
+		}
+		, print: function() {
+			this.app.router.print = true;
+			this.app.router.orderPrint( this.orderId );
 		}
 	});
 

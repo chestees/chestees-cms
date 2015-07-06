@@ -25,6 +25,7 @@
     "requirejs-text": "~2.0.13",
     "moment": "~2.9.0",
     "highcharts-release": "~4.1.1",
-    "jqueryui": "~1.11.3"
+    "jqueryui": "~1.11.3",
+    "uri.js": "~1.15.1"
   }
 }

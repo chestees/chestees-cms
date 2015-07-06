@@ -1,0 +1,57 @@
+<div class="header"><img src="/img/header_PackingSlip.jpg"></div>
+<div class="order-id">Order ID: {{ OrderID }}</div>
+<div class="date-ordered">Date Ordered: {{ DateOrdered }}</div>
+
+<table class="table cart">
+	<tr>
+		<th>Product</th>
+		<th>Size</th>
+		<th>Price</th>
+		<th>Qty</th>
+	</tr>
+	{{#each Products}}
+	<tr>
+		<td>{{Product}}<div class="style">Color: {{Style}}</div></td>
+		<td>{{SizeAbbr}}</td>
+		<td>{{Price}}</td>
+		<td>{{Quantity}}</td>
+	</tr>
+	{{/each}}
+</table>
+
+<div class="billing">
+	<h4>Billing Address</h4>
+	<div>
+		<div>{{BillingFName}} {{BillingLName}}</div>
+		<div>{{BillingAddress}}</div>
+		<div>{{BillingAddress2}}</div>
+		<div>{{BillingCity}}, {{BillingState}} {{BillingZip}}</div>
+	</div>
+</div>
+
+<div class="shipping">
+	<h4>Shipping Address</h4>
+	<div>
+		<div>{{ShippingFName}} {{ShippingLName}}</div>
+		<div>{{ShippingAddress}}</div>
+		<div>{{ShippingAddress2}}</div>
+		<div>{{ShippingCity}}, {{ShippingState}} {{ShippingZip}}</div>
+	</div>
+</div>
+<div class="payment">
+	<h4>Payment</h4>
+	<div>
+		<div>{{BillingFName}} {{BillingLName}}</div>
+		<div>{{CardType}}</div>
+		<div>{{CardNumber}}</div>
+	</div>
+</div>
+
+<div class="summary">
+	<div>Sub Total: {{PurchaseAmount}}</div>
+	<div>Shipping: {{ShippingCost}}</div>
+	<div>Discount: {{DiscountAmount}}</div>
+	<div>Total Amount: {{TotalAmount}}</div>
+</div>
+
+<div class="message">Thank you for your order! Since we want everyone to love their Chestees tee, if for some reason there is an issue with it, please use the contact form on our website or email info@chestees.com within 30 days and explain the situation. Chestees will then facilitate an exchange or refund.</div>
