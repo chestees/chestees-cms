@@ -1,5 +1,6 @@
-var sql = require( 'mssql' ),
-	_   = require('underscore');
+var sql    = require( 'mssql' )
+var config = require( 'config' );
+var _      = require('underscore');
 
 module.exports = function( app ) {
     sql.connect( config, _.bind( function( err ) {

@@ -2,13 +2,14 @@ var express     = require('express');
 var sql         = require('mssql');
 var serveStatic = require('serve-static');
 var _           = require('underscore');
-var auth = require('basic-auth')
+var auth        = require('basic-auth');
+var config      = require( 'config' );
 var app         = express();
 
 // Authentication 
 app.use( function( req, res, next ) {
 	var user = auth( req );
-	if ( !user || user.name !== 'chestees' || user.pass !== process.env.BASIC_AUTH_PW ) {
+	if ( !user || user.name !== 'chestees' || user.pass !== config.BASIC_AUTH_PW ) {
 		res.writeHead( 401, { 'WWW-Authenticate': 'Basic realm="Chestees Admin"' } );
 		res.end();
 	} else {
@@ -19,24 +20,17 @@ app.use( function( req, res, next ) {
 app.use( require('skipper')() );
 app.use( serveStatic('public') );
 
-app.set('port', (process.env.PORT || 5000));
+app.set('port', ( process.env.PORT || 5000 ) );
 
 app.listen(app.get('port'), function() {
   console.log("Node app is running at localhost:" + app.get('port'));
 });
 
-config = {
-	user: process.env.DB_USER,
-	password: process.env.DB_PASSWORD,
-	server: process.env.DB_SERVER,
-	database: process.env.DB_NAME,
-}
-
 require( './routes/order-detail' )( app );
 
 sql.connect( config, function( err ) {
 	if( err ) {
-		console.log("ERR: " + err );
+		console.log("Error: " + err );
 	}
 	
 	var shirtListing = new sql.Request();
@@ -102,6 +96,7 @@ sql.connect( config, function( err ) {
 	app.use('/api/orders', function( req, res ) {
 		var OrderId = req.query.OrderId;
 		var ProductId = req.query.ProductId;
+		var showAll = req.query.showAll;
 
 		if( OrderId ) {
 			orders.input( 'OrderId', OrderId );
@@ -139,6 +134,26 @@ sql.connect( config, function( err ) {
 					}
 				}
 			);
+		 } else if( showAll ) {
+		 	console.log( 'Executing orders all' );
+		 	var order    = new sql.Request();
+
+			// Orders - ALL
+			order.execute( 'usp_Chestees_Orders_All', _.bind( function( err, recordset, returnValue ) {
+				
+				// console.log( 'Orders: ' + JSON.stringify( recordset[0] ) + '\n' );
+
+				var orders      = recordset[0];
+
+				// console.log('Length: ' + recordset.length); // count of recordsets returned by the procedure 
+				// console.log('Length [0]: ' + recordset[0].length); // count of rows contained in first recordset 
+
+				if( err ) {
+					console.log("Error: " + err );
+				} else {
+					res.send( orders );
+				}
+			}, this ) );
 		} else {
 			var order    = new sql.Request();
 			var page     = req.query.Page || 1;

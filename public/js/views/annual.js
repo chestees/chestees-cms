@@ -30,7 +30,7 @@ define( function( require ) {
 
 			$.ajax({
 				type: 'get'
-				, url: '/api/orders/'
+				, url: '/api/orders?showAll=' + this.showAll
 				, dataType: 'json'
 				, contentType: 'application/json'
 				, data: {}
