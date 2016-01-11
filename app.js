@@ -6,10 +6,12 @@ var auth        = require('basic-auth');
 var config      = require( 'config' );
 var app         = express();
 
-// Authentication 
+// Authentication
 app.use( function( req, res, next ) {
 	var user = auth( req );
-	if ( !user || user.name !== 'chestees' || user.pass !== config.BASIC_AUTH_PW ) {
+	var password = process.env.BASIC_AUTH_PW || config.BASIC_AUTH_PW;
+	
+	if ( !user || user.name !== 'chestees' || user.pass !==  ) {
 		res.writeHead( 401, { 'WWW-Authenticate': 'Basic realm="Chestees Admin"' } );
 		res.end();
 	} else {
@@ -32,13 +34,13 @@ sql.connect( config, function( err ) {
 	if( err ) {
 		console.log("Error: " + err );
 	}
-	
+
 	var shirtListing = new sql.Request();
 	var cartItems    = new sql.Request();
 	var salesListing = new sql.Request();
 	var orders       = new sql.Request();
 	var orderItems   = new sql.Request();
-	
+
 	// Shirts listing
 	app.use('/api/shirts', function( req, res ) {
 		shirtListing.query( 'SELECT ProductID, Product, Image_Index FROM tblProduct ' +
@@ -135,18 +137,18 @@ sql.connect( config, function( err ) {
 				}
 			);
 		 } else if( showAll ) {
-		 	console.log( 'Executing orders all' );
-		 	var order    = new sql.Request();
+
+			var order    = new sql.Request();
 
 			// Orders - ALL
 			order.execute( 'usp_Chestees_Orders_All', _.bind( function( err, recordset, returnValue ) {
-				
+
 				// console.log( 'Orders: ' + JSON.stringify( recordset[0] ) + '\n' );
 
 				var orders      = recordset[0];
 
-				// console.log('Length: ' + recordset.length); // count of recordsets returned by the procedure 
-				// console.log('Length [0]: ' + recordset[0].length); // count of rows contained in first recordset 
+				// console.log('Length: ' + recordset.length); // count of recordsets returned by the procedure
+				// console.log('Length [0]: ' + recordset[0].length); // count of rows contained in first recordset
 
 				if( err ) {
 					console.log("Error: " + err );
@@ -166,15 +168,15 @@ sql.connect( config, function( err ) {
 			order.input( 'OrderBy', sql.NVarChar, orderBy );
 
 			order.execute( 'usp_Chestees_Orders', _.bind( function( err, recordset, returnValue ) {
-				
+
 				// console.log( '1: ' + JSON.stringify( recordset[0] ) + '\n');
 				console.log( '2: ' + JSON.stringify( recordset[1][0] ) + '\n' );
 
 				var orders      = recordset[0];
 				app.ordersCount = recordset[1][0];
 
-				// console.log('Length: ' + recordset.length); // count of recordsets returned by the procedure 
-				// console.log('Length [0]: ' + recordset[0].length); // count of rows contained in first recordset 
+				// console.log('Length: ' + recordset.length); // count of recordsets returned by the procedure
+				// console.log('Length [0]: ' + recordset[0].length); // count of rows contained in first recordset
 
 				if( err ) {
 					console.log("Error: " + err );
@@ -194,7 +196,7 @@ sql.connect( config, function( err ) {
 	// 	var ProductId = req.params.ProdId;
 
 	// 	salesListing.input( 'ProdId', ProductId );
-		
+
 	// 	salesListing.query( 'SELECT C.CartID, C.ProductID, C.Quantity, P.Product, P.Image_Index, C.Price, ' +
 	// 		'O.OrderID, O.DateOrdered ' +
 	// 		'FROM tblOrder O INNER JOIN relCartToOrder R ON O.OrderID = R.OrderID ' +
