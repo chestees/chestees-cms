@@ -10,8 +10,8 @@ var app         = express();
 app.use( function( req, res, next ) {
 	var user = auth( req );
 	var password = process.env.BASIC_AUTH_PW || config.BASIC_AUTH_PW;
-	
-	if ( !user || user.name !== 'chestees' || user.pass !==  ) {
+
+	if ( !user || user.name !== 'chestees' || user.pass !== password ) {
 		res.writeHead( 401, { 'WWW-Authenticate': 'Basic realm="Chestees Admin"' } );
 		res.end();
 	} else {
